@@ -16,7 +16,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include "streams.h"
+#ifndef __MINGW32__
 #include <CL/cl.h>
+#endif
 #include "globals.h"
 #include "xstring.h"
 #include <unistd.h>
@@ -150,7 +152,7 @@ int loadWorldData(char* file, struct world* world) {
 int saveWorldData(char* file, struct world* world) {
 
 }
-
+#ifndef __MINGW32__
 void updateWorldGPU(struct world* world) {
 	cl_int clret = 0;
 	cl_mem inputCL = clCreateBuffer(wire_context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, world->height * world->width / 4, world->data, &clret);
@@ -163,7 +165,7 @@ void updateWorldGPU(struct world* world) {
 		printf("Error in clEnqueueWriteBuffer<input>: '%i'\n", clret);
 		return;
 	}
-	cl_mem outputCL = clCreateBuffer(wire_context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, world->height * world->width / 4, world->newData, &clret);
+	cl_mem outputCL = clCreateBuffer(wire_context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, world->height * world->width / 4, world->newData, &clret);
 	if (clret != CL_SUCCESS) {
 		printf("Error in clCreateBuffer<output>: '%i'\n", clret);
 		return;
@@ -197,7 +199,7 @@ void updateWorldGPU(struct world* world) {
 	world->generation++;
 	world->gps++;
 }
-
+#else
 void updateWorldCPU(struct world* world) {
 	for (size_t y = 0; y < world->height; y++) {
 		for (size_t x = 0; x < world->width; x++) {
@@ -205,39 +207,39 @@ void updateWorldCPU(struct world* world) {
 			uint8_t newType = CELL_NONE;
 
 			switch (oldType) {
-			case CELL_HEAD:
+				case CELL_HEAD:
 				newType = CELL_TAIL;
 				break;
-			case CELL_TAIL:
+				case CELL_TAIL:
 				newType = CELL_WIRE;
 				break;
-			case CELL_WIRE: {
-				uint8_t n = 0;
-				int c = 1;
+				case CELL_WIRE: {
+					uint8_t n = 0;
+					int c = 1;
 
-				for (int j = -1; j <= 1 && c; j++) {
-					for (int i = -1; i <= 1 && c; i++) {
-						size_t k = x + i;
-						size_t l = y + j;
+					for (int j = -1; j <= 1 && c; j++) {
+						for (int i = -1; i <= 1 && c; i++) {
+							size_t k = x + i;
+							size_t l = y + j;
 
-						if (k < 0 || l < 0 || k >= world->width || l >= world->height) {
-							continue;
-						}
+							if (k < 0 || l < 0 || k >= world->width || l >= world->height) {
+								continue;
+							}
 
-						if (world_get(world->data, world->width, k, l) == CELL_HEAD) {
-							n++;
+							if (world_get(world->data, world->width, k, l) == CELL_HEAD) {
+								n++;
 
-							if (n > 2) {
-								// micro-optimization
-								c = 0;
+								if (n > 2) {
+									// micro-optimization
+									c = 0;
+								}
 							}
 						}
 					}
-				}
 
-				newType = (n == 1 || n == 2) ? CELL_HEAD : CELL_WIRE;
-				break;
-			}
+					newType = (n == 1 || n == 2) ? CELL_HEAD : CELL_WIRE;
+					break;
+				}
 			}
 
 			world_set(world->newData, world->width, x, y, newType);
@@ -251,3 +253,4 @@ void updateWorldCPU(struct world* world) {
 	world->generation++;
 	world->gps++;
 }
+#endif

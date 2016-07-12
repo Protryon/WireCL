@@ -36,7 +36,6 @@
 								<option id="gnu.c.link.option.libs.1031970330" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="png"/>
 									<listOptionValue builtIn="false" value="OpenCL"/>
-									<listOptionValue builtIn="false" value="z"/>
 									<listOptionValue builtIn="false" value=":libglfw3.a"/>
 									<listOptionValue builtIn="false" value="X11"/>
 									<listOptionValue builtIn="false" value="dl"/>
@@ -107,13 +106,10 @@
 							</tool>
 							<tool command="i686-w64-mingw32-gcc" id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1892331952" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug">
 								<option id="gnu.c.link.option.libs.1288997698" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="z"/>
-									<listOptionValue builtIn="false" value="glew32"/>
 									<listOptionValue builtIn="false" value=":libglfw3.a"/>
 									<listOptionValue builtIn="false" value="opengl32"/>
 									<listOptionValue builtIn="false" value="glu32"/>
 									<listOptionValue builtIn="false" value="gdi32"/>
-									<listOptionValue builtIn="false" value="ws2_32"/>
 									<listOptionValue builtIn="false" value="png"/>
 								</option>
 								<option id="gnu.c.link.option.paths.396778129" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">

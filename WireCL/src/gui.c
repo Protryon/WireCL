@@ -37,7 +37,11 @@ struct __attribute__((__packed__)) rpix {
 
 void gui_tick() {
 	//tb_cursor_counter++;
+#ifndef __MINGW32__
 	updateWorldGPU (world);
+#else
+	updateWorldCPU (world);
+#endif
 }
 
 void loadGUI() {

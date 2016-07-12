@@ -19,7 +19,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "world.h"
+#ifndef __MINGW32__
 #include <CL/cl.h>
+#endif
 #include <pthread.h>
 
 int fr = 30;
@@ -202,6 +204,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	close(sfd);
+#ifndef __MINGW32__
 	cl_platform_id platform_id = NULL;
 	cl_uint ret_num_devices;
 	cl_uint ret_num_platforms;
@@ -215,6 +218,7 @@ int main(int argc, char *argv[]) {
 	char bl[65536];
 	clGetProgramBuildInfo(wire_program, device_id, CL_PROGRAM_BUILD_LOG, 65536, bl, NULL);
 	printf("Build Log: %s\n", bl);
+#endif
 	pthread_t gpt;
 	pthread_create(&gpt, NULL, updateThread, NULL);
 	width = 800;

@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/glew.c \
 ../src/gui.c \
 ../src/json.c \
 ../src/main.c \
@@ -14,6 +15,7 @@ C_SRCS += \
 ../src/xstring.c 
 
 OBJS += \
+./src/glew.o \
 ./src/gui.o \
 ./src/json.o \
 ./src/main.o \
@@ -24,6 +26,7 @@ OBJS += \
 ./src/xstring.o 
 
 C_DEPS += \
+./src/glew.d \
 ./src/gui.d \
 ./src/json.d \
 ./src/main.d \
