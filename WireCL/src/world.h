@@ -17,8 +17,10 @@
 
 struct world {
 		uint8_t* data;
+		uint8_t* newData;
 		uint32_t width;
 		uint32_t height;
+		uint32_t generation;
 		//total size is width * height / 4, pos index is [y * width + x / 4] & (0x03 << ((x % 4) * 2))
 		//set by [y * width + x / 4] = ~([y * width + x / 4] & (0x03 << ((x % 4) * 2))) | value
 		// 0 = empty 1 = wire 2 = electron head 3 = electron tail

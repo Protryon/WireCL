@@ -65,7 +65,7 @@ void displayCallback() {
 	if (ms2 > lf + 1000.) {
 		double t = ms2 - lf;
 		lf = ms2;
-		printf("FPS: %f\n", (float) frames / (t / 1000.));
+		printf("FPS: %f Generation: %i\n", (float) frames / (t / 1000.), world->generation);
 		frames = 0;
 	}
 

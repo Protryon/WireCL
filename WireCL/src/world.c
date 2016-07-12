@@ -66,6 +66,7 @@ int loadWorldText(char* file, struct world* world) {
 	if (world->height % 4 > 0) world->height += (4 - world->height % 4);
 
 	world->data = malloc((world->height * world->width / 4) + 1);
+	world->newData = malloc((world->height * world->width / 4) + 1);
 
 	for (size_t i = 0; i < world->height; i++) {
 		if (i < lineCount) {
@@ -121,7 +122,10 @@ int saveWorldData(char* file, struct world* world) {
 
 void updateWorld(struct world* world) {
 	size_t size = world->height * world->width / 4;
-	uint8_t *newData = calloc(size + 1, 1);
+
+	for(int i = 0; i < size; i++) {
+		*(world->newData + i) = 0;
+	}
 
 	for(size_t y = 0; y < world->height; y++) {
 		for(size_t x = 0; x < world->width; x++) {
@@ -164,13 +168,13 @@ void updateWorld(struct world* world) {
 				}
 			}
 
-			set(newData, world->width, x, y, newType);
+			set(world->newData, world->width, x, y, newType);
 		}
 	}
 
 	for(int i = 0; i < size; i++) {
-		*(world->data + i) = *(newData + i);
+		*(world->data + i) = *(world->newData + i);
 	}
 
-	free(newData);
+	world->generation++;
 }
