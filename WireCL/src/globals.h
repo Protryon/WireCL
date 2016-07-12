@@ -12,8 +12,6 @@
 
 int width;
 int height;
-int swidth;
-int sheight;
 int mouseX;
 int mouseY;
 int mouseButton;
@@ -21,6 +19,9 @@ int csf;
 int hasMouse;
 GLFWwindow* window;
 struct world* world;
+float zoom;
+float camX;
+float camY;
 
 #define PI 3.141592653589793
 

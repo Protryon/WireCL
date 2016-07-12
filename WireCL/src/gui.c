@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <png.h>
+#include "world.h"
 
 #define GSTATE_INGAME 0
 
@@ -362,7 +363,30 @@ void loadGUI() {
  */
 
 void drawIngame(float partialTick) {
-
+	float wzoom = width * zoom;
+	float hzoom = height * zoom;
+	int dr = 0;
+	glBegin (GL_QUADS);
+	for (int32_t x = (camX - wzoom / 2. - 16) / 16.; x < (camX + wzoom / 2. + 16) / 16.; x++) {
+		for (int32_t y = (camY - hzoom / 2. - 16) / 16.; y < (camY + hzoom / 2. + 16) / 16.; y++) {
+			uint8_t v = 0;
+			if (x >= 0 && y >= 0 && x < world->width && y < world->height) {
+				v = world->data[y * world->width / 4 + x / 4] & (0x03 << ((x % 4) * 2));
+				v >>= (x % 4) * 2;
+			}
+			if (v == 0) glColor3f(0., 0., 0.);
+			else if (v == 1) glColor3f(1., 1., 0.);
+			else if (v == 2) glColor3f(0., 0., 1.);
+			else if (v == 3) glColor3f(1., 0., 0.);
+			glVertex2f(x * 16. - camX, y * 16. - camY);
+			glVertex2f(x * 16. - camX, (y + 1.) * 16. - camY);
+			glVertex2f((x + 1.) * 16. - camX, (y + 1.) * 16. - camY);
+			glVertex2f((x + 1.) * 16. - camX, y * 16. - camY);
+			dr++;
+		}
+	}
+	glEnd();
+	printf("%i quads\n");
 }
 
 void drawGUI(float partialTick) {
@@ -383,15 +407,26 @@ void gui_textCallback(unsigned int codepoint) {
 	}
 }
 
+double lmx = 0.;
+double lmy = 0.;
+
 void gui_mouseMotionCallback(double x, double y) {
 	if (guistate == GSTATE_INGAME) {
-
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)) {
+			double dx = lmx - x;
+			double dy = lmy - y;
+			camX += dx * zoom;
+			camY += dy * zoom;
+		}
+		lmx = x;
+		lmy = y;
 	}
 }
 
 void gui_scrollCallback(double x, double y) {
 	if (guistate == GSTATE_INGAME) {
-
+		zoom -= y;
+		if (zoom < 1.) zoom = 1.;
 	}
 }
 

@@ -48,13 +48,13 @@ void displayCallback() {
 	glfwGetFramebufferSize(window, &width, &height);
 	int v5 = 1000;
 	int sf = 1;
-	swidth = width;
-	sheight = height;
-	while (sf < v5 && swidth / (sf + 1) >= 320 && sheight / (sf + 1) >= 240) {
-		sf++;
-	}
-	swidth = (int) ceil(swidth / sf);
-	sheight = (int) ceil(sheight / sf);
+	//swidth = width;
+	//sheight = height;
+	//while (sf < v5 && swidth / (sf + 1) >= 320 && sheight / (sf + 1) >= 240) {
+	//	sf++;
+	//}
+	//swidth = (int) ceil(swidth / sf);
+	//sheight = (int) ceil(sheight / sf);
 	csf = sf;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	double ms2 = (double) ts.tv_sec * 1000. + (double) ts.tv_nsec / 1000000.;
@@ -73,17 +73,12 @@ void displayCallback() {
 	//clock_gettime(CLOCK_MONOTONIC, &ts2);
 	//printf("tick-time: %f\n", ((double) ts2.tv_sec * 1000. + (double) ts2.tv_nsec / 1000000.) - ms2);
 	float partialTick = ((ms2 - lt) / 50.);
-	glEnable (GL_TEXTURE_2D);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width, height);
 	glMatrixMode (GL_PROJECTION);
 	glLoadIdentity();
+	glOrtho(0., width * zoom, height * zoom, 0., 1000., 3000.);
 	glMatrixMode (GL_MODELVIEW);
-	glLoadIdentity();
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0., swidth, sheight, 0., 1000., 3000.);
-	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0., 0., -2000.);
 	drawGUI(partialTick);
@@ -133,6 +128,7 @@ void mouseCallback(GLFWwindow* window, int button, int action, int mods) {
 		//}
 	}
 	if (action == GLFW_PRESS) mouseButton = button;
+	else if (action == GLFW_RELEASE) mouseButton = -1;
 }
 
 void scrollCallback(GLFWwindow* window, double x, double y) {
@@ -158,6 +154,7 @@ int main(int argc, char *argv[]) {
 			loadWorldText(argv[i], world);
 		}
 	}
+	zoom = 1.;
 //#ifdef __MINGW32__
 //	WORD versionWanted = MAKEWORD(1, 1);
 //	WSADATA wsaData;
