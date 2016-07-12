@@ -9,6 +9,7 @@
 #define GLOBALS_H_
 
 #include <GLFW/glfw3.h>
+#include <CL/cl.h>
 
 int width;
 int height;
@@ -22,6 +23,10 @@ struct world* world;
 float zoom;
 float camX;
 float camY;
+
+cl_program wire_program;
+cl_command_queue wire_command_queue;
+cl_context wire_context;
 
 #define PI 3.141592653589793
 

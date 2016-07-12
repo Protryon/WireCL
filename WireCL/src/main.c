@@ -19,6 +19,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "world.h"
+#include <CL/cl.h>
+#include <pthread.h>
 
 int fr = 30;
 int rr = 0;
@@ -60,12 +62,13 @@ void displayCallback() {
 	double ms2 = (double) ts.tv_sec * 1000. + (double) ts.tv_nsec / 1000000.;
 	while (ms2 > lt + 50.) {
 		lt += 50.;
-		tick();
+		//tick();
 	}
 	if (ms2 > lf + 1000.) {
 		double t = ms2 - lf;
 		lf = ms2;
-		printf("FPS: %f Generation: %i\n", (float) frames / (t / 1000.), world->generation);
+		printf("FPS: %f Generation: %i GPS: %i\n", (float) frames / (t / 1000.), world->generation, world->gps);
+		world->gps = 0;
 		frames = 0;
 	}
 
@@ -80,6 +83,7 @@ void displayCallback() {
 	glOrtho(0., width * zoom, height * zoom, 0., 1000., 3000.);
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity();
+	glClearColor(0, 0, 0, 1);
 	glTranslatef(0., 0., -2000.);
 	drawGUI(partialTick);
 	size_t error = glGetError();
@@ -109,6 +113,12 @@ void displayCallback() {
 	//clock_gettime(CLOCK_MONOTONIC, &ts2);
 	//printf("render-time: %f\n", ((double) ts2.tv_sec * 1000. + (double) ts2.tv_nsec / 1000000.) - ms2);
 }
+
+void updateThread(void* arg) {
+	while (1) {
+		tick();
+	}
+	pthread_cancel (pthread_this());}
 
 void mouseMotionCallback(GLFWwindow* window, double x, double y) {
 	gui_mouseMotionCallback(x, y);
@@ -172,6 +182,41 @@ int main(int argc, char *argv[]) {
 	ecwd[0] = 0;
 	chdir(ncwd);
 	printf("Loading... [FROM=%s]\n", strlen(INSTALLDIR) == 0 ? ncwd : INSTALLDIR);
+	int sfd = open("./assets/wireworld.cl", O_RDONLY);
+	if (sfd < 0) {
+		char cwd[1024];
+		getcwd(cwd, 1024);
+		printf("Couldn't open wireworld.cl! <%s> <%s>\n", cwd, strerror(errno));
+		return 1;
+	}
+	char* src = malloc(4097);
+	size_t tc = 4096;
+	size_t r = 0;
+	ssize_t x = 0;
+	while ((x = read(sfd, src + r, tc - r)) > 0) {
+		r += x;
+		src[r] = 0;
+		if (tc - r < 2048) {
+			tc += 4096;
+			src = realloc(src, tc + 1);
+		}
+	}
+	close(sfd);
+	cl_platform_id platform_id = NULL;
+	cl_uint ret_num_devices;
+	cl_uint ret_num_platforms;
+	cl_device_id device_id = NULL;
+	cl_int ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
+	ret = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &ret_num_devices); // if u dont have a GPU, change to CPU (please no push)
+	wire_context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
+	wire_command_queue = clCreateCommandQueue(wire_context, device_id, 0, &ret);
+	wire_program = clCreateProgramWithSource(wire_context, 1, (const char **) &src, (const size_t *) &r, &ret);
+	ret = clBuildProgram(wire_program, 1, &device_id, NULL, NULL, NULL);
+	char bl[65536];
+	clGetProgramBuildInfo(wire_program, device_id, CL_PROGRAM_BUILD_LOG, 65536, bl, NULL);
+	printf("Build Log: %s\n", bl);
+	pthread_t gpt;
+	pthread_create(&gpt, NULL, updateThread, NULL);
 	width = 800;
 	height = 600;
 	if (!glfwInit()) return -1;

@@ -9,6 +9,7 @@
 #define WORLD_H_
 
 #include <stdint.h>
+#include <pthread.h>
 
 #define CELL_NONE 0
 #define CELL_WIRE 1
@@ -21,6 +22,8 @@ struct world {
 		uint32_t width;
 		uint32_t height;
 		uint32_t generation;
+		uint32_t gps;
+		pthread_mutex_t swapMutex;
 		//total size is width * height / 4, pos index is [y * width + x / 4] & (0x03 << ((x % 4) * 2))
 		//set by [y * width + x / 4] = ~([y * width + x / 4] & (0x03 << ((x % 4) * 2))) | value
 		// 0 = empty 1 = wire 2 = electron head 3 = electron tail
@@ -30,11 +33,13 @@ struct world* newWorld();
 
 void freeWorld(struct world* world);
 
-void set(uint8_t *data, int width, int x, int y, uint8_t type);
+void world_set(uint8_t *data, int width, int x, int y, uint8_t type);
 
-uint8_t get(uint8_t *data, int width, int x, int y);
+uint8_t world_get(uint8_t *data, int width, int x, int y);
 
-void updateWorld(struct world* world);
+void updateWorldGPU(struct world* world);
+
+void updateWorldCPU(struct world* world);
 
 int loadWorldText(char* file, struct world* world);
 

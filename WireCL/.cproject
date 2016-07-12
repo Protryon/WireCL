@@ -35,6 +35,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.497786515" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug">
 								<option id="gnu.c.link.option.libs.1031970330" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="png"/>
+									<listOptionValue builtIn="false" value="OpenCL"/>
 									<listOptionValue builtIn="false" value="z"/>
 									<listOptionValue builtIn="false" value=":libglfw3.a"/>
 									<listOptionValue builtIn="false" value="X11"/>
