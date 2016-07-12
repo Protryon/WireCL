@@ -55,7 +55,7 @@ void loadGUI() {
 		fontColors[i][1] = v8;
 		fontColors[i][2] = v9;
 	}
-	FILE* fd = fopen(INSTALLDIR "assets/minecraft/textures/font/ascii.png", "rb");
+	FILE* fd = fopen(INSTALLDIR "assets/ascii.png", "rb");
 	if (!fd) goto ppn;
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!png) {

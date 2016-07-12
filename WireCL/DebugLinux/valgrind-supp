@@ -1,0 +1,90 @@
+{
+   igleak
+   Memcheck:Leak
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   igv1
+   Memcheck:Value1
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   igv2
+   Memcheck:Value2
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   igv4
+   Memcheck:Value4
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   igv8
+   Memcheck:Value8
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   igv16
+   Memcheck:Value16
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   igcond
+   Memcheck:Cond
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   iga1
+   Memcheck:Addr1
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   iga2
+   Memcheck:Addr2
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   iga4
+   Memcheck:Addr4
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   iga8
+   Memcheck:Addr8
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   iga16
+   Memcheck:Addr16
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   igjump
+   Memcheck:Jump
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   igfree
+   Memcheck:Free
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
+{
+   igoverlap
+   Memcheck:Overlap
+   ...
+   obj:/usr/lib/dri/fglrx_dri.so
+}
