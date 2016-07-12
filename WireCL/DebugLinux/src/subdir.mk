@@ -9,6 +9,8 @@ C_SRCS += \
 ../src/main.c \
 ../src/nbt.c \
 ../src/render.c \
+../src/streams.c \
+../src/world.c \
 ../src/xstring.c 
 
 OBJS += \
@@ -17,6 +19,8 @@ OBJS += \
 ./src/main.o \
 ./src/nbt.o \
 ./src/render.o \
+./src/streams.o \
+./src/world.o \
 ./src/xstring.o 
 
 C_DEPS += \
@@ -25,6 +29,8 @@ C_DEPS += \
 ./src/main.d \
 ./src/nbt.d \
 ./src/render.d \
+./src/streams.d \
+./src/world.d \
 ./src/xstring.d 
 
 

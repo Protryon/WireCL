@@ -18,6 +18,7 @@
 #include "render.h"
 #include <unistd.h>
 #include <fcntl.h>
+#include "world.h"
 
 int fr = 30;
 int rr = 0;
@@ -147,9 +148,16 @@ void cursorEnterCallback(GLFWwindow* window, int entered) {
 }
 
 int main(int argc, char *argv[]) {
-	//for (int i = 1; i < argc; i++) {
-
-	//}
+	if (argc < 2) {
+		printf("Usage: WireCL <file>\n");
+		return 0;
+	}
+	for (int i = 1; i < argc; i++) {
+		if (i == argc - 1) {
+			world = newWorld();
+			loadWorldText(argv[i], world);
+		}
+	}
 //#ifdef __MINGW32__
 //	WORD versionWanted = MAKEWORD(1, 1);
 //	WSADATA wsaData;

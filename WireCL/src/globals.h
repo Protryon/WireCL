@@ -20,6 +20,7 @@ int mouseButton;
 int csf;
 int hasMouse;
 GLFWwindow* window;
+struct world* world;
 
 #define PI 3.141592653589793
 
