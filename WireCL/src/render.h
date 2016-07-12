@@ -17,39 +17,20 @@ unsigned char fontWidth[256];
 struct __attribute__((packed)) vertex {
 		float x;
 		float y;
-		float z;
-};
-
-struct __attribute__((packed)) vertex_tex {
-		float x;
-		float y;
-		float z;
-		float texX;
-		float texY;
-};
-
-union uvertex {
-		struct vertex vert;
-		struct vertex_tex tex;
 };
 
 struct vao {
 		int vao;
 		int vbo;
-		int tex;
 		size_t vertex_count;
-		int vib;
-		size_t index_count;
 };
 
 #define TX_NONE 0
 #define TX_ASCII 1
 
-void virtVertex3f(union uvertex* vert, float x, float y, float z);
+void virtVertex2f(struct vertex* vert, float x, float y);
 
-void virtTexCoord2f(struct vertex_tex* vert, float x, float y);
-
-void createVAO(struct vertex* verticies, size_t count, struct vao* vao, int textures, int overwrite, int vattrib);
+void createVAO(struct vertex* verticies, size_t count, struct vao* vao, int overwrite);
 
 void deleteVAO(struct vao* vao);
 

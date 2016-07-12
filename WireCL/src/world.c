@@ -5,6 +5,12 @@
  *      Author: root
  */
 
+#ifdef __MINGW32__
+#define GLEW_STATIC
+#include <GL/glew.h>
+#endif
+#include <GL/gl.h>
+#include <GL/glext.h>
 #include "world.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +21,7 @@
 #include "xstring.h"
 #include <unistd.h>
 #include <pthread.h>
+#include "render.h"
 
 struct world* newWorld() {
 	struct world* world = malloc(sizeof(struct world));
@@ -25,6 +32,8 @@ struct world* newWorld() {
 	world->generation = 0;
 	world->newData = NULL;
 	pthread_mutex_init(&world->swapMutex, NULL);
+	//world->vao = NULL;
+	//world->verts = NULL;
 	return world;
 }
 
@@ -99,8 +108,18 @@ int loadWorldText(char* file, struct world* world) {
 			}
 		}
 	}
-
 	free(lines);
+	//world->vao = calloc(sizeof(struct vao*), 1);
+	//world->verts = calloc(sizeof(struct vertex) * world->width * world->height * 4, 1);
+	//glGenVertexArrays(1, &world->vao->vao);
+	//printf("gvao %i\n", world->vao->vao);
+	//glBindVertexArray(world->vao->vao);
+	//glGenBuffers(1, world->vao->vbo);
+	//glBindBuffer(GL_ARRAY_BUFFER, world->vao->vbo);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(struct vertex) * world->width * world->height * 4, world->verts, GL_STATIC_DRAW);
+	//world->vao->vertex_count = world->width * world->height * 4;
+	//glVertexPointer(2, GL_FLOAT, sizeof(struct vertex), 0);
+	//glEnableClientState (GL_VERTEX_ARRAY);
 	return 0;
 }
 

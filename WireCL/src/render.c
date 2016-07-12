@@ -18,52 +18,26 @@
 #include "globals.h"
 #include <png.h>
 
-void virtVertex3f(union uvertex* vert, float x, float y, float z) {
-	vert->vert.x = x;
-	vert->vert.y = y;
-	vert->vert.z = z;
+void virtVertex2f(struct vertex* vert, float x, float y) {
+	vert->x = x;
+	vert->y = y;
 }
 
-void virtTexCoord2f(struct vertex_tex* vert, float x, float y) {
-	vert->texX = x;
-	vert->texY = y;
-}
-
-void createVAO(struct vertex* verticies, size_t count, struct vao* vao, int textures, int overwrite, int vattrib) {
+void createVAO(struct vertex* verticies, size_t count, struct vao* vao, int overwrite) {
 	if (!overwrite) glGenVertexArrays(1, &vao->vao);
 	glBindVertexArray(vao->vao);
 	if (!overwrite) {
 		glGenBuffers(1, &vao->vbo);
-		glGenBuffers(1, &vao->vib);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, vao->vbo);
-	glBufferData(GL_ARRAY_BUFFER, count * (textures ? sizeof(struct vertex_tex) : sizeof(struct vertex)), verticies, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vao->vib);
-	vao->index_count = count; // restart ? (count + (count / restart) - 1) : count;
+	glBufferData(GL_ARRAY_BUFFER, count * sizeof(struct vertex), verticies, GL_STATIC_DRAW);
 	vao->vertex_count = count;
-	uint16_t indicies[vao->index_count];
-	size_t vi = 0;
-	for (size_t i = 0; i < vao->index_count; i++) {
-		//if (restart && i > 0 && ((i + 1) % (restart + 1)) == 0) {
-		//	indicies[i] = 16000;
-		//} else {
-		indicies[i] = vi++;
-		//}
-	}
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * vao->index_count, indicies, GL_STATIC_DRAW);
-	size_t rz = vattrib ? ((vattrib == GL_BYTE || vattrib == GL_UNSIGNED_BYTE) ? 1 : ((vattrib == GL_SHORT || vattrib == GL_UNSIGNED_SHORT) ? 2 : 4)) : 0;
-	glVertexPointer(3, GL_FLOAT, (textures ? sizeof(struct vertex_tex) : sizeof(struct vertex)) + rz, 0);
-	if (textures) glTexCoordPointer(2, GL_FLOAT, sizeof(struct vertex_tex) + rz, (void*) (sizeof(struct vertex)));
+	glVertexPointer(2, GL_FLOAT, sizeof(struct vertex), 0);
 	glEnableClientState (GL_VERTEX_ARRAY);
-	if (textures) glEnableClientState (GL_TEXTURE_COORD_ARRAY);
-	if (vattrib) glVertexAttribIPointer(0, 1, vattrib, (textures ? sizeof(struct vertex_tex) : sizeof(struct vertex)) + rz, (void*) (sizeof(struct vertex_tex)));
-	glBindVertexArray(0);
-	vao->tex = textures;
 }
 
 void deleteVAO(struct vao* vao) {
 	glDeleteBuffers(1, &vao->vbo);
-	glDeleteBuffers(1, &vao->vib);
 	glDeleteVertexArrays(1, &vao->vao);
 }
 
@@ -76,13 +50,13 @@ void crossp(double* v1, double* v2, double* res) {
 void drawTriangles(struct vao* vao) {
 	if (vao->vertex_count % 3 != 0) return;
 	glBindVertexArray(vao->vao);
-	glDrawElements(GL_TRIANGLES, vao->index_count, GL_UNSIGNED_SHORT, NULL);
+	glDrawArrays(GL_TRIANGLES, 0, vao->vertex_count);
 }
 
 void drawQuads(struct vao* vao) {
 	if (vao->vertex_count % 4 != 0) return;
 	glBindVertexArray(vao->vao);
-	glDrawElements(GL_QUADS, vao->index_count, GL_UNSIGNED_SHORT, NULL);
+	glDrawArrays(GL_QUADS, 0, vao->vertex_count);
 }
 
 void drawChar(char c, int italic) {

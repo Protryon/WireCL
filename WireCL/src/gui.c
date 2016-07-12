@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <png.h>
 #include "world.h"
+#include "render.h"
 
 #define GSTATE_INGAME 0
 
@@ -123,251 +124,16 @@ void loadGUI() {
 	png_destroy_read_struct(&png, &info, NULL);
 	fclose (fd);
 	ppn: ;
+
 }
-/*
- int drawButton(int x, int y, int width, int height, char* text, int disabled) { // state  is 0 for disabled, 1 for normal, 2 for hovering
- glBindTexture(GL_TEXTURE_2D, TX_WIDGETS);
-
- int state = disabled ? 0 : ((mouseX > x && mouseX < x + width && mouseY > y && mouseY < y + height) ? 2 : 1);
- glColor4f(1., 1., 1., 1.);
- drawTexturedModalRect(x, y, 0, 0, 46 + state * 20, width / 2, height);
- glColor4f(1., 1., 1., 1.);
- drawTexturedModalRect(x + width / 2, y, 0, 200 - width / 2, 46 + state * 20, width / 2, height);
- uint32_t color = -1;
- if (state == 0) {
- color = 10526880;
- } else if (state == 2) {
- color = 16777120;
- } else {
- color = 14737632;
- }
- glColor4f(1., 1., 1., 1.);
- drawString(text, x + width / 2 - stringWidth(text) / 2, y + height / 2 - 4, color);
- return state == 2;
-
- }
-
- int drawTextbox(int x, int y, int width, int height, char* text, int* cursorPos, int highlightStart, int highlightEnd, int scrollOffset, int enabled, int focused) {
- drawRect(x - 1, y - 1, 1, width + 2, height + 2, -6250336);
- drawRect(x, y, 2, width, height, -16777216);
- int v1 = enabled ? 14737632 : 7368816;
- int v2 = *cursorPos - scrollOffset;
- int v3 = highlightEnd - scrollOffset;
- char* ns = strdup(text);
- if (scrollOffset > strlen(ns)) scrollOffset = strlen(ns);
- trimStringToWidth(ns + scrollOffset, width);
- size_t nsl = strlen(ns);
- int v5 = v2 >= 0 && v2 <= nsl;
- int v6 = focused && tb_cursor_counter / 6 % 2 == 0 && v5;
- int v7 = x + 4;
- int v8 = y + (height - 8) / 2;
- if (v3 > nsl) {
- v3 = nsl;
- }
- char tns = 0;
- if (nsl > 0) {
- if (v5) {
- tns = ns[v2];
- ns[v2] = 0;
- }
- drawString(ns, v7, v8, v1);
- }
- int v13 = *cursorPos < nsl || nsl >= 32768;
- int v11 = stringWidth(ns);
- int v9 = v11;
- int os = v11;
- if (!v5) {
- v11 = v2 > 0 ? v7 + width : v7;
- } else if (v13) {
- v11 = v9 - 1;
- --v9;
- }
- if (nsl > 0 && v5 && v2 < nsl) {
- ns[v2] = tns;
- drawString(ns + v2, v7 + os, v8, v1);
- }
- if (v6) {
- if (v13) {
- drawRect(v7 + v11, v8 - 1, 3, 1, 2 + 9, -3092272);
- } else {
- drawString("_", v7 + v11, v8, v1);
- }
- }
-
- if (mouseX > x && mouseX < x + width && mouseY > y && mouseY < y + height && mouseButton == 0) {
- int rx = mouseX - x - 4;
- trimStringToWidth(ns, rx);
- *cursorPos = strlen(ns) + scrollOffset;
- free(ns);
- return 1;
- } else {
- free(ns);
- return 0;
- }
- }
-
- void drawMainMenu(float partialTick) {
- //static int fbid = -1;
- glBindTexture(GL_TEXTURE_2D, TX_MMTT);
- glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
- glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
- glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
- //if (fbid == -1) glGenFramebuffers(1, &fbid);
- //glBindFramebuffer(GL_FRAMEBUFFER, fbid);
- //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, TX_MMTT, 0);
- //static int rb = -1;
- //if (rb == -1) glGenRenderbuffers(1, &rb);
- //glBindRenderbuffer(GL_RENDERBUFFER, rb);
- //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 256, 256);
- //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb);
- glViewport(0, 0, 256, 256);
- glMatrixMode (GL_PROJECTION);
- glPushMatrix();
- glLoadIdentity();
- gluPerspective(120., 1., .05, 10.);
- glMatrixMode (GL_MODELVIEW);
- glPushMatrix();
- glLoadIdentity();
- glColor4f(1., 1., 1., 1.);
- glRotatef(180., 1., 0., 0.);
- glRotatef(180., 0., 0., 1.);
- glEnable (GL_BLEND);
- glDisable (GL_CULL_FACE);
- glDisable (GL_ALPHA_TEST);
- glDepthMask(0);
- glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
- for (int i = 0; i < 64; i++) {
- glPushMatrix();
- float v8 = (fmod(((float) i), 8.) / 7.5) / 64.;
- float v9 = ((((float) i) / 8.) / 7.5) / 64.;
- glTranslatef(v8, v9, 0.);
- glRotatef(-90., 0., 0., 1.);
- glRotatef((sin((mm_pantimer + partialTick) / 400.) * 25.) + 20., 1., 0., 0.);
- glRotatef(-(mm_pantimer + partialTick) * 0.1, 0., 1., 0.);
- for (int x = 0; x < 6; x++) {
- glPushMatrix();
- if (x == 0) {
- glBindTexture(GL_TEXTURE_2D, TX_PAN0);
- } else if (x == 1) {
- glRotatef(90., 0., 1., 0.);
- glBindTexture(GL_TEXTURE_2D, TX_PAN1);
- } else if (x == 2) {
- glRotatef(180., 0., 1., 0.);
- glBindTexture(GL_TEXTURE_2D, TX_PAN2);
- } else if (x == 3) {
- glRotatef(-90., 0., 1., 0.);
- glBindTexture(GL_TEXTURE_2D, TX_PAN3);
- } else if (x == 4) {
- glRotatef(90., 1., 0., 0.);
- glBindTexture(GL_TEXTURE_2D, TX_PAN4);
- } else if (x == 5) {
- glRotatef(-90., 1., 0., 0.);
- glBindTexture(GL_TEXTURE_2D, TX_PAN5);
- }
- glColor4f(1., 1., 1., 1. / (float) (i + 1));
- drawQuads(&mod_pan);
- glPopMatrix();
- }
- glPopMatrix();
- glColorMask(1, 1, 1, 0);
- }
- glColorMask(1, 1, 1, 1);
- glMatrixMode(GL_PROJECTION);
- glPopMatrix();
- glMatrixMode(GL_MODELVIEW);
- glPopMatrix();
- glEnable(GL_CULL_FACE);
- glDepthMask(1);
- for (int i = 0; i < 7; i++) {
- glBindTexture(GL_TEXTURE_2D, TX_MMTT);
- glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
- glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
- glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, 256, 256);
- glEnable(GL_BLEND);
- glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
- glColorMask(1, 1, 1, 0);
- glDisable(GL_ALPHA_TEST);
- glBegin (GL_QUADS);
- for (int v5 = 0; v5 < 3; v5++) {
- glColor4f(1., 1., 1., 1. / (float) (v5 + 1));
- float v8 = ((float) (v5 - 3 / 2)) / 256.;
- glTexCoord2f(v8, 1.);
- glVertex3f(swidth, sheight, -1.);
- glTexCoord2f(1. + v8, 1.);
- glVertex3f(swidth, 0., -1.);
- glTexCoord2f(1. + v8, 0.);
- glVertex3f(0., 0., -1.);
- glTexCoord2f(v8, 0.);
- glVertex3f(0., sheight, -1.);
- }
- glEnd();
- glEnable(GL_ALPHA_TEST);
- glColorMask(1, 1, 1, 1);
- }
- glDisable(GL_BLEND);
- glColor4f(1., 1., 1., 1.);
- //glDeleteRenderbuffers(1, &rb);
- glBindFramebuffer(GL_FRAMEBUFFER, 0);
- //glDeleteFramebuffers(1, &fbid);
- glViewport(0, 0, width, height);
- glBindTexture(GL_TEXTURE_2D, TX_MMTT);
- float vr = swidth > sheight ? 120. / (float) swidth : 120. / (float) sheight;
- float ah = (float) sheight * vr / 256.;
- float aw = (float) swidth * vr / 256.;
- glBegin (GL_QUADS);
- glTexCoord2f(.5 - ah, .5 + aw);
- glVertex3f(0., sheight, -.5);
- glTexCoord2f(.5 - ah, .5 - aw);
- glVertex3f(swidth, sheight, -.5);
- glTexCoord2f(.5 + ah, .5 - aw);
- glVertex3f(swidth, 0., -.5);
- glTexCoord2f(.5 + ah, .5 + aw);
- glVertex3f(0., 0., -.5);
- glEnd();
- int ttx = TX_MMTT;
- glDeleteTextures(1, &ttx);
- int v7 = swidth / 2 - 137;
- glBindTexture(GL_TEXTURE_2D, TX_TITLE);
- drawTexturedModalRect(v7, 30, 0, 0, 0, 155, 44);
- drawTexturedModalRect(v7 + 155, 30, 0, 0, 45, 155, 44);
- glPushMatrix();
- glTranslatef((float) swidth / 2. + 90., 70., 1.);
- glRotatef(-20., 0., 0., 1.);
- char* splash = "Minecraft in C!";
- int sw = stringWidth(splash);
- struct timespec ts;
- clock_gettime(CLOCK_MONOTONIC, &ts);
- double ms = (double) ts.tv_nsec / 1000000. + ts.tv_sec * 1000.;
- float v9 = 1.8 - fabs(sin((float) (fmod(ms, 1000.)) / 1000. * PI * 2.) * 0.1);
- v9 = v9 * 100. / (float) (sw + 32);
- glScalef(v9, v9, v9);
- drawString(splash, -sw / 2, -12, -256);
- glPopMatrix();
- drawString("Minecraft 1.9", 2, sheight - 10, -1);
- drawString("Recreated By JavaProphet in C", 2, sheight - 20, -1);
- char* copy = "Copyright Mojang AB. Do not distribute!";
- drawString(copy, swidth - stringWidth(copy) - 2, sheight - 10, -1);
- copy = "Copyright JavaProphet (code)!";
- drawString(copy, swidth - stringWidth(copy) - 2, sheight - 20, -1);
- drawButton(swidth / 2 - 100, sheight / 4 + 48, 200, 20, "Singleplayer", 1);
- if (drawButton(swidth / 2 - 100, sheight / 4 + 48 + 24, 200, 20, "Multiplayer", 0) && mouseButton == 0) {
- guistate = GSTATE_MULTIPLAYER;
- }
- drawButton(swidth / 2 - 100, sheight / 4 + 48 + 48, 200, 20, "Minecraft Realms", 1);
- if (drawButton(swidth / 2 - 100, sheight / 4 + 48 + 72 + 12, 98, 20, "Options", 1) && mouseButton == 0) {
- guistate = GSTATE_OPTIONS;
- }
- if (drawButton(swidth / 2 + 2, sheight / 4 + 48 + 72 + 12, 98, 20, "Quit Game", 0) && mouseButton == 0) {
- exit(0);
- }
- }
- */
 
 void drawIngame(float partialTick) {
 	float wzoom = width * zoom;
 	float hzoom = height * zoom;
-	glBegin (GL_QUADS);
 	pthread_mutex_lock(&world->swapMutex);
+	glPushMatrix();
+	glTranslatef(-camX + wzoom / 2., -camY + hzoom / 2., 0.);
+	glBegin (GL_QUADS);
 	for (int32_t x = (camX - wzoom / 2. - 16) / 16.; x < (camX + wzoom / 2. + 16) / 16.; x++) {
 		for (int32_t y = (camY - hzoom / 2. - 16) / 16.; y < (camY + hzoom / 2. + 16) / 16.; y++) {
 			uint8_t v = 0;
@@ -375,17 +141,30 @@ void drawIngame(float partialTick) {
 				v = world_get(world->data, world->width, x, y);
 			}
 			if (v == 0) continue;
-			else if (v == 1) glColor3f(1., 1., 0.);
+			/*if (world->verts[y * world->width * 4 + x * 4].x == 0. && world->verts[y * world->width * 4 + x * 4].y == 0. && world->verts[y * world->width * 4 + x * 4 + 2].x == 0. && world->verts[y * world->width * 4 + x * 4 + 2].y == 0.) {
+			 printf("make %i, %i\n", x, y);
+			 struct vertex* verts = &world->verts[y * world->width * 4 + x * 4];
+			 virtVertex2f(&verts[0], x * 16., y * 16.);
+			 virtVertex2f(&verts[1], x * 16., (y + 1.) * 16.);
+			 virtVertex2f(&verts[2], (x + 1.) * 16., (y + 1.) * 16.);
+			 virtVertex2f(&verts[3], (x + 1.) * 16., y * 16.);
+			 glBindVertexArray(world->vao->vao);
+			 glBindBuffer(GL_ARRAY_BUFFER, world->vao->vbo);
+			 glBufferSubData(GL_ARRAY_BUFFER, y * world->width * 4 * sizeof(struct vertex) + x * 4 * sizeof(struct vertex), sizeof(struct vertex) * 4, verts);
+			 }*/
+			if (v == 1) glColor3f(1., 1., 0.);
 			else if (v == 2) glColor3f(0., 0., 1.);
 			else if (v == 3) glColor3f(1., 0., 0.);
-			glVertex2f(x * 16. - camX, y * 16. - camY);
-			glVertex2f(x * 16. - camX, (y + 1.) * 16. - camY);
-			glVertex2f((x + 1.) * 16. - camX, (y + 1.) * 16. - camY);
-			glVertex2f((x + 1.) * 16. - camX, y * 16. - camY);
+			glVertex2f(x * 16., y * 16.);
+			glVertex2f(x * 16., (y + 1.) * 16.);
+			glVertex2f((x + 1.) * 16., (y + 1.) * 16.);
+			glVertex2f((x + 1.) * 16., y * 16.);
 		}
 	}
-	pthread_mutex_unlock(&world->swapMutex);
+	//drawQuads(world->vao);
 	glEnd();
+	glPopMatrix();
+	pthread_mutex_unlock(&world->swapMutex);
 }
 
 void drawGUI(float partialTick) {
