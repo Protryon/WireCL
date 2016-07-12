@@ -10,6 +10,11 @@
 
 #include <stdint.h>
 
+#define CELL_NONE 0
+#define CELL_WIRE 1
+#define CELL_HEAD 2
+#define CELL_TAIL 3
+
 struct world {
 		uint8_t* data;
 		uint32_t width;
@@ -22,6 +27,12 @@ struct world {
 struct world* newWorld();
 
 void freeWorld(struct world* world);
+
+void set(uint8_t *data, int width, int x, int y, uint8_t type);
+
+uint8_t get(uint8_t *data, int width, int x, int y);
+
+void updateWorld(struct world* world);
 
 int loadWorldText(char* file, struct world* world);
 
