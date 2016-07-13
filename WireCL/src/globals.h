@@ -27,7 +27,7 @@ struct world* world;
 float zoom;
 float camX;
 float camY;
-int paused = 1;
+int paused;
 int reflush;
 int skr;
 //#ifndef __MINGW32__

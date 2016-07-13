@@ -154,7 +154,8 @@ void drawIngame(float partialTick) {
 	float wzoom = width * zoom;
 	float hzoom = height * zoom;
 	uint8_t v;
-	uint8_t* rdata = malloc(world->width * world->height * 3); //malloc(world->width * world->height * 3);
+	static uint8_t* rdata = NULL;
+	if (!rdata) rdata = malloc(world->width * world->height * 3);
 	uint8_t r;
 	uint8_t g;
 	uint8_t b;
@@ -198,7 +199,6 @@ void drawIngame(float partialTick) {
 #endif
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, world->width, world->height, 0, GL_RGB, GL_UNSIGNED_BYTE, rdata);
-	free(rdata);
 	glPushMatrix();
 	glTranslatef(-camX + wzoom / 2., -camY + hzoom / 2., 0.);
 	/*pthread_mutex_lock(&world->swapMutex);

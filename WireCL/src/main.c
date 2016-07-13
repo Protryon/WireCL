@@ -148,6 +148,7 @@ void cursorEnterCallback(GLFWwindow* window, int entered) {
 }
 
 int main(int argc, char *argv[]) {
+	paused = 1;
 	if (argc < 2) {
 		printf("Usage: WireCL <file>\n");
 		return 0;
