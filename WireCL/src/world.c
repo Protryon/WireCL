@@ -169,6 +169,7 @@ void updateWorldGPU(struct world* world) {
 	}
 	if (reflush) {
 		clEnqueueWriteBuffer(wire_command_queue, inputCL, CL_TRUE, 0, world->height * world->width / 4, world->data, 0, NULL, NULL);
+		reflush = 0;
 	}
 	if (!outputCL) {
 		outputCL = clCreateBuffer(wire_context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, world->height * world->width / 4, NULL, &clret);

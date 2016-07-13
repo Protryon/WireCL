@@ -37,9 +37,10 @@ struct __attribute__((__packed__)) rpix {
 
 void gui_tick() {
 	//tb_cursor_counter++;
-	if (!paused) {
+	if (!paused || skr > 0) {
 //#ifndef __MINGW32__
 		updateWorldGPU (world);
+		if (skr > 0) skr--;
 //#else
 //		updateWorldCPU (world);
 //#endif
@@ -275,6 +276,14 @@ void gui_keyboardCallback(int key, int scancode, int action, int mods) {
 				reflush = 1;
 			}
 			paused = !paused;
+		} else if (key == 83) {
+			if (paused && action == GLFW_PRESS) {
+				if (paused == 2) {
+					reflush = 1;
+					paused = 1;
+				}
+				skr++;
+			}
 		} else if (paused) {
 			if (key == 341) {
 				if (action == GLFW_PRESS) sfs = 1;
