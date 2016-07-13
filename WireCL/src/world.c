@@ -197,11 +197,11 @@ void updateWorldGPU(struct world* world) {
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	double cms = (double) ts.tv_sec * 1000. + (double) ts.tv_nsec / 1000000.;
 	int gnd = 0;
-	if (cms - lms < (1000. / 60.)) {
+	if (cms - lms > (1000. / 60.)) {
 		clEnqueueReadBuffer(wire_command_queue, outputCL, CL_TRUE, 0, world->height * world->width / 4, world->newData, 0, NULL, NULL);
 		gnd = 1;
+		lms = cms;
 	}
-	lms = cms;
 	//clReleaseMemObject(inputCL);
 	//clReleaseMemObject(outputCL);
 	//clReleaseKernel (kernel);

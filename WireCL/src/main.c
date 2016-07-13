@@ -46,19 +46,22 @@ struct timespec ts;
 double lt;
 double lf;
 int frames;
+double lfms = 0.;
 
 void displayCallback() {
+	double cms = (double) ts.tv_sec * 1000. + (double) ts.tv_nsec / 1000000.;
+	if (cms - lfms < (1000. / 60.)) {
+		double usd = (cms - lfms);
+		double ttnf = (1000. / 60.) - usd;
+		//printf("ttnf %f %f\n", usd, ttnf);
+		if (ttnf > 0.) {
+			usleep(ttnf * 1000.);
+		}
+	}
+	lfms = cms;
 	frames++;
 	glfwGetFramebufferSize(window, &width, &height);
-	int v5 = 1000;
 	int sf = 1;
-	//swidth = width;
-	//sheight = height;
-	//while (sf < v5 && swidth / (sf + 1) >= 320 && sheight / (sf + 1) >= 240) {
-	//	sf++;
-	//}
-	//swidth = (int) ceil(swidth / sf);
-	//sheight = (int) ceil(sheight / sf);
 	csf = sf;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	double ms2 = (double) ts.tv_sec * 1000. + (double) ts.tv_nsec / 1000000.;
