@@ -132,18 +132,7 @@ void mouseMotionCallback(GLFWwindow* window, double x, double y) {
 }
 
 void mouseCallback(GLFWwindow* window, int button, int action, int mods) {
-	if (button == 3 || button == 4) {
-		//if (state == GLUT_UP) return;
-		//if (button == 3) {
-		//	heldItem++;
-		//	if (heldItem == 9) heldItem = 0;
-		//} else {
-		//	heldItem--;
-		//	if (heldItem == -1) heldItem = 8;
-		//}
-	}
-	if (action == GLFW_PRESS) mouseButton = button;
-	else if (action == GLFW_RELEASE) mouseButton = -1;
+	gui_mouseCallback(button, action, mods);
 }
 
 void scrollCallback(GLFWwindow* window, double x, double y) {

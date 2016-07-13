@@ -28,7 +28,7 @@ float zoom;
 float camX;
 float camY;
 int paused;
-
+int reflush;
 //#ifndef __MINGW32__
 cl_program wire_program;
 cl_command_queue wire_command_queue;

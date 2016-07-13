@@ -46,6 +46,8 @@ void gui_tick() {
 	}
 }
 
+int delrad = 1;
+
 void loadGUI() {
 	for (int32_t i = 0; i < 32; i++) {
 		int32_t v6 = (i >> 3 & 1) * 85;
@@ -133,6 +135,20 @@ void loadGUI() {
 
 }
 
+int sfs = 0;
+double lmx = 0.;
+double lmy = 0.;
+
+void screenToWorld(double* x, double* y) {
+	*x = ((camX - (float) width * zoom / 2. + (float) *x * zoom) / 16.);
+	*y = ((camY - (float) height * zoom / 2. + (float) *y * zoom) / 16.);
+}
+
+void screenToWorldInt(int32_t* x, int32_t* y) {
+	*x = (int32_t)((camX - (float) width * zoom / 2. + (float) *x * zoom) / 16.);
+	*y = (int32_t)((camY - (float) height * zoom / 2. + (float) *y * zoom) / 16.);
+}
+
 void drawIngame(float partialTick) {
 	float wzoom = width * zoom;
 	float hzoom = height * zoom;
@@ -213,9 +229,21 @@ void drawIngame(float partialTick) {
 			glVertex2f((x + 1.) * 16., y * 16.);
 		}
 	}
+	pthread_mutex_unlock(&world->swapMutex);
+	if (sfs && paused) {
+		int32_t mx = (int32_t) lmx;
+		int32_t my = (int32_t) lmy;
+		screenToWorldInt(&mx, &my);
+		double rx = (double) mx + .5;
+		double ry = (double) my + .5;
+		glColor3f(0., 1., 0.);
+		glVertex2f((rx - delrad + .5) * 16., (ry - delrad + .5) * 16.);
+		glVertex2f((rx - delrad + .5) * 16., (ry + delrad - .5) * 16.);
+		glVertex2f((rx + delrad - .5) * 16., (ry + delrad - .5) * 16.);
+		glVertex2f((rx + delrad - .5) * 16., (ry - delrad + .5) * 16.);
+	}
 	//drawQuads(world->vao);
 	glEnd();
-	pthread_mutex_unlock(&world->swapMutex);
 	//glBegin (GL_QUADS);
 	//glVertex2f(0., 0.);
 	//glTexCoord2f(0., 1.);
@@ -239,8 +267,17 @@ void drawGUI(float partialTick) {
 void gui_keyboardCallback(int key, int scancode, int action, int mods) {
 	if (guistate == GSTATE_INGAME) {
 		if (key == 32 && action == GLFW_PRESS) {
+			if (paused == 2) {
+				reflush = 1;
+			}
 			paused = !paused;
+		} else if (paused) {
+			if (key == 341) {
+				if (action == GLFW_PRESS) sfs = 1;
+			}
 		}
+		if (key == 341 && action == GLFW_RELEASE) sfs = 0;
+
 	}
 }
 
@@ -250,9 +287,17 @@ void gui_textCallback(unsigned int codepoint) {
 	}
 }
 
-double lmx = 0.;
-double lmy = 0.;
+void placeAtPos(int32_t x, int32_t y, uint8_t value) {
+	screenToWorldInt(&x, &y);
+	if (x < 0 || y < 0 || x >= world->width || y >= world->height) {
+		return;
+	}
+	world_set(world->data, world->width, x, y, value);
+}
 
+double lgpx = -1.;
+double lgpy = -1.;
+int bp = 0;
 void gui_mouseMotionCallback(double x, double y) {
 	if (guistate == GSTATE_INGAME) {
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
@@ -261,15 +306,88 @@ void gui_mouseMotionCallback(double x, double y) {
 			camX += dx * zoom;
 			camY += dy * zoom;
 		}
+		if (paused && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) && !bp) {
+			double lx = x;
+			double ly = y;
+			screenToWorld(&lx, &ly);
+			double ang = atan2(ly - lgpy, lx - lgpx);
+			double lx2 = lgpx;
+			double ly2 = lgpy;
+			if (lx2 == -1.) lx2 = lx;
+			if (ly2 == -1.) ly2 = ly;
+			//printf("angle %f\n", ang);
+			double acos = cos(ang); // not a arccos/arcsin!!!!!!!
+			double asin = sin(ang);
+			int c = 0;
+			while (c++ < 50) {
+				//printf("%i: %f, %f\n", c, lp2xx, lp2yy);
+				int32_t px = (int32_t) lx2;
+				int32_t py = (int32_t) ly2;
+				if (px < 0 || py < 0 || px >= world->width || py >= world->height) continue;
+				if (lx2 < 0 || ly2 < 0 || lx2 >= world->width || ly2 >= world->height) {
+					return;
+				}
+				if (sfs) {
+					for (int32_t zx = px - delrad + 1; zx <= px + delrad - 1; zx++) {
+						for (int32_t zy = py - delrad + 1; zy <= py + delrad - 1; zy++) {
+							if (zx < 0 || zy < 0 || zx >= world->width || zy >= world->height) continue;
+							world_set(world->data, world->width, zx, zy, 0);
+						}
+					}
+				} else {
+					world_set(world->data, world->width, lx2, ly2, CELL_WIRE);
+				}
+				if (fabs(lx2 - lx) < 1. && fabs(ly2 - ly) < 1.) {
+					c = 50;
+				}
+				lx2 += acos;
+				ly2 += asin;
+			}
+			//printf("%i extra set\n", c);
+			paused = 2;
+			lgpx = lx;
+			lgpy = ly;
+		} else {
+			lgpx = -1.;
+			lgpy = -1.;
+		}
 		lmx = x;
 		lmy = y;
 	}
 }
 
+void gui_mouseCallback(int button, int action, int mods) {
+	if (paused) {
+		if (button == 1 && action == GLFW_PRESS) {
+			if (mods & GLFW_MOD_CONTROL) {
+				int32_t mx = (int32_t) lmx;
+				int32_t my = (int32_t) lmy;
+				screenToWorldInt(&mx, &my);
+				for (int32_t x = mx - delrad + 1; x <= mx + delrad - 1; x++) {
+					for (int32_t y = my - delrad + 1; y <= my + delrad - 1; y++) {
+						if (x < 0 || y < 0 || x >= world->width || y >= world->height) continue;
+						world_set(world->data, world->width, x, y, 0);
+					}
+				}
+				paused = 2;
+			} else {
+				placeAtPos(lmx, lmy, (mods & GLFW_MOD_SHIFT) ? CELL_HEAD : CELL_WIRE);
+				paused = 2;
+				bp = mods & GLFW_MOD_SHIFT;
+			}
+		}
+	}
+}
+
 void gui_scrollCallback(double x, double y) {
 	if (guistate == GSTATE_INGAME) {
-		zoom -= y;
-		if (zoom < 1.) zoom = 1.;
+		if (paused && sfs) {
+			delrad += y;
+			if (delrad < 1.) delrad = 1.;
+		} else {
+			zoom -= y;
+			if (zoom < 1.) zoom = 1.;
+		}
 	}
 }
 
