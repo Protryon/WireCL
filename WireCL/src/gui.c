@@ -153,83 +153,94 @@ void drawIngame(float partialTick) {
 	float wzoom = width * zoom;
 	float hzoom = height * zoom;
 	uint8_t v;
-	/*uint8_t* rdata = malloc(world->width * world->height * 3);
-	 uint8_t r;
-	 uint8_t g;
-	 uint8_t b;
-	 pthread_mutex_lock(&world->swapMutex);
-	 for (int32_t y = 0; y < world->height; y++) {
-	 for (int32_t x = 0; x < world->width; x++) {
-	 v = world_get(world->data, world->width, x, y);
-	 //printf("<%i, %i> = %i (%lu)\n", x, y, v, y * world->width * 3 + x * 3);
-	 if (v == 1) {
-	 r = 0xFF;
-	 g = 0xFF;
-	 b = 0x00;
-	 } else if (v == 2) {
-	 r = 0x00;
-	 g = 0x00;
-	 b = 0xFF;
-	 } else if (v == 3) {
-	 r = 0xFF;
-	 g = 0x00;
-	 b = 0x00;
-	 } else {
-	 r = 0x00;
-	 g = 0x00;
-	 b = 0x00;
-	 }
-	 rdata[y * world->width * 3 + x * 3] = r;
-	 rdata[y * world->width * 3 + x * 3 + 1] = g;
-	 rdata[y * world->width * 3 + x * 3 + 2] = b;
-	 }
-	 }
-	 pthread_mutex_unlock(&world->swapMutex);
-	 glEnable (GL_TEXTURE_2D);
-	 glBindTexture(GL_TEXTURE_2D, TX_MAP);
-	 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	 #ifdef GL_TEXTURE_MAX_ANISOTROPY_EXT
-	 glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0);
-	 #endif
-	 glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, world->width, world->height, 0, GL_RGB, GL_UNSIGNED_BYTE, rdata);
-	 free(rdata);*/
-	glPushMatrix();
-	glTranslatef(-camX + wzoom / 2., -camY + hzoom / 2., 0.);
+	uint8_t* rdata = malloc(world->width * world->height * 3); //malloc(world->width * world->height * 3);
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
 	pthread_mutex_lock(&world->swapMutex);
-	glBegin (GL_QUADS);
-	for (int32_t x = (camX - wzoom / 2. - 16) / 16.; x < (camX + wzoom / 2. + 16) / 16.; x++) {
-		for (int32_t y = (camY - hzoom / 2. - 16) / 16.; y < (camY + hzoom / 2. + 16) / 16.; y++) {
-			v = 0;
-			if (x >= 0 && y >= 0 && x < world->width && y < world->height) {
-				v = world_get(world->data, world->width, x, y);
+	for (int32_t y = 0; y < world->height; y++) {
+		for (int32_t x = 0; x < world->width; x++) {
+			v = world_get(world->data, world->width, x, y);
+			//printf("<%i, %i> = %i (%lu)\n", x, y, v, y * world->width * 3 + x * 3);
+			if (v == 1) {
+				r = 0xFF;
+				g = 0xFF;
+				b = 0x00;
+			} else if (v == 2) {
+				r = 0x00;
+				g = 0x00;
+				b = 0xFF;
+			} else if (v == 3) {
+				r = 0xFF;
+				g = 0x00;
+				b = 0x00;
+			} else {
+				r = 0x00;
+				g = 0x00;
+				b = 0x00;
 			}
-			if (v == 0) continue;
-			/*if (world->verts[y * world->width * 4 + x * 4].x == 0. && world->verts[y * world->width * 4 + x * 4].y == 0. && world->verts[y * world->width * 4 + x * 4 + 2].x == 0. && world->verts[y * world->width * 4 + x * 4 + 2].y == 0.) {
-			 printf("make %i, %i\n", x, y);
-			 struct vertex* verts = &world->verts[y * world->width * 4 + x * 4];
-			 virtVertex2f(&verts[0], x * 16., y * 16.);
-			 virtVertex2f(&verts[1], x * 16., (y + 1.) * 16.);
-			 virtVertex2f(&verts[2], (x + 1.) * 16., (y + 1.) * 16.);
-			 virtVertex2f(&verts[3], (x + 1.) * 16., y * 16.);
-			 glBindVertexArray(world->vao->vao);
-			 glBindBuffer(GL_ARRAY_BUFFER, world->vao->vbo);
-			 glBufferSubData(GL_ARRAY_BUFFER, y * world->width * 4 * sizeof(struct vertex) + x * 4 * sizeof(struct vertex), sizeof(struct vertex) * 4, verts);
-			 }*/
-			if (v == 1) glColor3f(1., 1., 0.);
-			else if (v == 2) glColor3f(0., 0., 1.);
-			else if (v == 3) glColor3f(1., 0., 0.);
-			glVertex2f(x * 16., y * 16.);
-			glVertex2f(x * 16., (y + 1.) * 16.);
-			glVertex2f((x + 1.) * 16., (y + 1.) * 16.);
-			glVertex2f((x + 1.) * 16., y * 16.);
+			rdata[y * world->width * 3 + x * 3] = r;
+			rdata[y * world->width * 3 + x * 3 + 1] = g;
+			rdata[y * world->width * 3 + x * 3 + 2] = b;
 		}
 	}
 	pthread_mutex_unlock(&world->swapMutex);
+	glEnable (GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, TX_MAP);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef GL_TEXTURE_MAX_ANISOTROPY_EXT
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0);
+#endif
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, world->width, world->height, 0, GL_RGB, GL_UNSIGNED_BYTE, rdata);
+	free(rdata);
+	glPushMatrix();
+	glTranslatef(-camX + wzoom / 2., -camY + hzoom / 2., 0.);
+	/*pthread_mutex_lock(&world->swapMutex);
+	 glBegin (GL_QUADS);
+	 for (int32_t x = (camX - wzoom / 2. - 16) / 16.; x < (camX + wzoom / 2. + 16) / 16.; x++) {
+	 for (int32_t y = (camY - hzoom / 2. - 16) / 16.; y < (camY + hzoom / 2. + 16) / 16.; y++) {
+	 v = 0;
+	 if (x >= 0 && y >= 0 && x < world->width && y < world->height) {
+	 v = world_get(world->data, world->width, x, y);
+	 }
+	 if (v == 0) continue;
+	 /*if (world->verts[y * world->width * 4 + x * 4].x == 0. && world->verts[y * world->width * 4 + x * 4].y == 0. && world->verts[y * world->width * 4 + x * 4 + 2].x == 0. && world->verts[y * world->width * 4 + x * 4 + 2].y == 0.) {
+	 printf("make %i, %i\n", x, y);
+	 struct vertex* verts = &world->verts[y * world->width * 4 + x * 4];
+	 virtVertex2f(&verts[0], x * 16., y * 16.);
+	 virtVertex2f(&verts[1], x * 16., (y + 1.) * 16.);
+	 virtVertex2f(&verts[2], (x + 1.) * 16., (y + 1.) * 16.);
+	 virtVertex2f(&verts[3], (x + 1.) * 16., y * 16.);
+	 glBindVertexArray(world->vao->vao);
+	 glBindBuffer(GL_ARRAY_BUFFER, world->vao->vbo);
+	 glBufferSubData(GL_ARRAY_BUFFER, y * world->width * 4 * sizeof(struct vertex) + x * 4 * sizeof(struct vertex), sizeof(struct vertex) * 4, verts);
+	 }* /
+	 if (v == 1) glColor3f(1., 1., 0.);
+	 else if (v == 2) glColor3f(0., 0., 1.);
+	 else if (v == 3) glColor3f(1., 0., 0.);
+	 glVertex2f(x * 16., y * 16.);
+	 glVertex2f(x * 16., (y + 1.) * 16.);
+	 glVertex2f((x + 1.) * 16., (y + 1.) * 16.);
+	 glVertex2f((x + 1.) * 16., y * 16.);
+	 }
+	 }
+	 pthread_mutex_unlock(&world->swapMutex);*/
+	glBegin (GL_QUADS);
+	glVertex2f(0., 0.);
+	glTexCoord2f(0., 1.);
+	glVertex2f(0., world->height * 16.);
+	glTexCoord2f(1., 1.);
+	glVertex2f(world->width * 16., world->height * 16.);
+	glTexCoord2f(1., 0.);
+	glVertex2f(world->width * 16., 0.);
+	glTexCoord2f(0., 0.);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
 	if (sfs && paused) {
 		int32_t mx = (int32_t) lmx;
 		int32_t my = (int32_t) lmy;
@@ -237,25 +248,18 @@ void drawIngame(float partialTick) {
 		double rx = (double) mx + .5;
 		double ry = (double) my + .5;
 		glColor3f(0., 1., 0.);
+		glBegin(GL_QUADS);
 		glVertex2f((rx - delrad + .5) * 16., (ry - delrad + .5) * 16.);
 		glVertex2f((rx - delrad + .5) * 16., (ry + delrad - .5) * 16.);
 		glVertex2f((rx + delrad - .5) * 16., (ry + delrad - .5) * 16.);
 		glVertex2f((rx + delrad - .5) * 16., (ry - delrad + .5) * 16.);
+		glEnd();
+		glColor3f(1., 1., 1.);
 	}
 	//drawQuads(world->vao);
-	glEnd();
-	//glBegin (GL_QUADS);
-	//glVertex2f(0., 0.);
-	//glTexCoord2f(0., 1.);
-	//glVertex2f(0., world->height * 16.);
-	//glTexCoord2f(1., 1.);
-	//glVertex2f(world->width * 16., world->height * 16.);
-	//glTexCoord2f(1., 0.);
-	//glVertex2f(world->width * 16., 0.);
-	//glTexCoord2f(0., 0.);
 	//glEnd();
 	glPopMatrix();
-	//glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
 }
 
 void drawGUI(float partialTick) {
