@@ -13,6 +13,8 @@
 #include <CL/cl.h>
 #endif
 
+#define FRAMELIMIT 60.
+
 int width;
 int height;
 int mouseX;
@@ -25,6 +27,7 @@ struct world* world;
 float zoom;
 float camX;
 float camY;
+int paused;
 
 #ifndef __MINGW32__
 cl_program wire_program;

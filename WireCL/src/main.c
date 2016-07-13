@@ -50,9 +50,9 @@ double lfms = 0.;
 
 void displayCallback() {
 	double cms = (double) ts.tv_sec * 1000. + (double) ts.tv_nsec / 1000000.;
-	if (cms - lfms < (1000. / 60.)) {
+	if (cms - lfms < (1000. / FRAMELIMIT)) {
 		double usd = (cms - lfms);
-		double ttnf = (1000. / 60.) - usd;
+		double ttnf = (1000. / FRAMELIMIT) - usd;
 		//printf("ttnf %f %f\n", usd, ttnf);
 		if (ttnf > 0.) {
 			usleep(ttnf * 1000.);
@@ -167,6 +167,8 @@ int main(int argc, char *argv[]) {
 		if (i == argc - 1) {
 			world = newWorld();
 			loadWorldText(argv[i], world);
+			camX = world->width * 16. / 2.;
+			camY = world->height * 16. / 2.;
 		}
 	}
 	zoom = 1.;
@@ -187,6 +189,7 @@ int main(int argc, char *argv[]) {
 	ecwd[0] = 0;
 	chdir(ncwd);
 	printf("Loading... [FROM=%s]\n", strlen(INSTALLDIR) == 0 ? ncwd : INSTALLDIR);
+#ifndef __MINGW32__
 	int sfd = open("./assets/wireworld.cl", O_RDONLY);
 	if (sfd < 0) {
 		char cwd[1024];
@@ -207,7 +210,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	close(sfd);
-#ifndef __MINGW32__
 	cl_platform_id platform_id = NULL;
 	cl_uint ret_num_devices;
 	cl_uint ret_num_platforms;

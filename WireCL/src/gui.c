@@ -37,11 +37,13 @@ struct __attribute__((__packed__)) rpix {
 
 void gui_tick() {
 	//tb_cursor_counter++;
+	if (!paused) {
 #ifndef __MINGW32__
-	updateWorldGPU (world);
+		updateWorldGPU (world);
 #else
-	updateWorldCPU (world);
+		updateWorldCPU (world);
 #endif
+	}
 }
 
 void loadGUI() {
@@ -179,7 +181,9 @@ void drawGUI(float partialTick) {
 
 void gui_keyboardCallback(int key, int scancode, int action, int mods) {
 	if (guistate == GSTATE_INGAME) {
-
+		if (key == 32 && action == GLFW_PRESS) {
+			paused = !paused;
+		}
 	}
 }
 
@@ -194,7 +198,7 @@ double lmy = 0.;
 
 void gui_mouseMotionCallback(double x, double y) {
 	if (guistate == GSTATE_INGAME) {
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)) {
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)) {
 			double dx = lmx - x;
 			double dy = lmy - y;
 			camX += dx * zoom;
