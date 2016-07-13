@@ -9,9 +9,9 @@
 #define GLOBALS_H_
 
 #include <GLFW/glfw3.h>
-#ifndef __MINGW32__
+//#ifndef __MINGW32__
 #include <CL/cl.h>
-#endif
+//#endif
 
 #define FRAMELIMIT 60.
 
@@ -29,11 +29,11 @@ float camX;
 float camY;
 int paused;
 
-#ifndef __MINGW32__
+//#ifndef __MINGW32__
 cl_program wire_program;
 cl_command_queue wire_command_queue;
 cl_context wire_context;
-#endif
+//#endif
 #define PI 3.141592653589793
 
 #ifdef __MINGW32__

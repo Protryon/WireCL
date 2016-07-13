@@ -27,6 +27,7 @@ struct vao {
 
 #define TX_NONE 0
 #define TX_ASCII 1
+#define TX_MAP 2
 
 void virtVertex2f(struct vertex* vert, float x, float y);
 

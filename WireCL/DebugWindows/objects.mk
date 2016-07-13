@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -l:libglfw3.a -lopengl32 -lglu32 -lgdi32 -lpng
+LIBS := -l:libglfw3.a -l:libopencl.a -lopengl32 -lglu32 -lgdi32 -lpng
 

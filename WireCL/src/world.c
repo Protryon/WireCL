@@ -16,9 +16,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include "streams.h"
-#ifndef __MINGW32__
+//#ifndef __MINGW32__
 #include <CL/cl.h>
-#endif
+//#endif
 #include "globals.h"
 #include "xstring.h"
 #include <unistd.h>
@@ -66,7 +66,6 @@ int loadWorldText(char* file, struct world* world) {
 	size_t lineCount = 0;
 	char* line = NULL;
 	size_t maxWidth = 0;
-
 	do {
 		line = NULL;
 		if (readLineDynamic(fd, &line) < 0 || line == NULL) break;
@@ -154,7 +153,7 @@ int saveWorldData(char* file, struct world* world) {
 
 }
 
-#ifndef __MINGW32__
+//#ifndef __MINGW32__
 cl_mem inputCL;
 cl_mem outputCL;
 cl_kernel clk;
@@ -219,58 +218,59 @@ void updateWorldGPU(struct world* world) {
 	world->generation++;
 	world->gps++;
 }
-#else
-void updateWorldCPU(struct world* world) {
-	for (size_t y = 0; y < world->height; y++) {
-		for (size_t x = 0; x < world->width; x++) {
-			uint8_t oldType = world_get(world->data, world->width, x, y);
-			uint8_t newType = CELL_NONE;
+/*#else
+ void updateWorldCPU(struct world* world) {
+ for (size_t y = 0; y < world->height; y++) {
+ for (size_t x = 0; x < world->width; x++) {
+ uint8_t oldType = world_get(world->data, world->width, x, y);
+ uint8_t newType = CELL_NONE;
 
-			switch (oldType) {
-				case CELL_HEAD:
-				newType = CELL_TAIL;
-				break;
-				case CELL_TAIL:
-				newType = CELL_WIRE;
-				break;
-				case CELL_WIRE: {
-					uint8_t n = 0;
-					int c = 1;
+ switch (oldType) {
+ case CELL_HEAD:
+ newType = CELL_TAIL;
+ break;
+ case CELL_TAIL:
+ newType = CELL_WIRE;
+ break;
+ case CELL_WIRE: {
+ uint8_t n = 0;
+ int c = 1;
 
-					for (int j = -1; j <= 1 && c; j++) {
-						for (int i = -1; i <= 1 && c; i++) {
-							size_t k = x + i;
-							size_t l = y + j;
+ for (int j = -1; j <= 1 && c; j++) {
+ for (int i = -1; i <= 1 && c; i++) {
+ size_t k = x + i;
+ size_t l = y + j;
 
-							if (k < 0 || l < 0 || k >= world->width || l >= world->height) {
-								continue;
-							}
+ if (k < 0 || l < 0 || k >= world->width || l >= world->height) {
+ continue;
+ }
 
-							if (world_get(world->data, world->width, k, l) == CELL_HEAD) {
-								n++;
+ if (world_get(world->data, world->width, k, l) == CELL_HEAD) {
+ n++;
 
-								if (n > 2) {
-									// micro-optimization
-									c = 0;
-								}
-							}
-						}
-					}
+ if (n > 2) {
+ // micro-optimization
+ c = 0;
+ }
+ }
+ }
+ }
 
-					newType = (n == 1 || n == 2) ? CELL_HEAD : CELL_WIRE;
-					break;
-				}
-			}
+ newType = (n == 1 || n == 2) ? CELL_HEAD : CELL_WIRE;
+ break;
+ }
+ }
 
-			world_set(world->newData, world->width, x, y, newType);
-		}
-	}
-	pthread_mutex_lock(&world->swapMutex);
-	void* od = world->data;
-	world->data = world->newData;
-	world->newData = od;
-	pthread_mutex_unlock(&world->swapMutex);
-	world->generation++;
-	world->gps++;
-}
-#endif
+ world_set(world->newData, world->width, x, y, newType);
+ }
+ }
+ pthread_mutex_lock(&world->swapMutex);
+ void* od = world->data;
+ world->data = world->newData;
+ world->newData = od;
+ pthread_mutex_unlock(&world->swapMutex);
+ world->generation++;
+ world->gps++;
+ }
+ #endif
+ */

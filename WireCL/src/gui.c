@@ -38,11 +38,11 @@ struct __attribute__((__packed__)) rpix {
 void gui_tick() {
 	//tb_cursor_counter++;
 	if (!paused) {
-#ifndef __MINGW32__
+//#ifndef __MINGW32__
 		updateWorldGPU (world);
-#else
-		updateWorldCPU (world);
-#endif
+//#else
+//		updateWorldCPU (world);
+//#endif
 	}
 }
 
@@ -136,13 +136,59 @@ void loadGUI() {
 void drawIngame(float partialTick) {
 	float wzoom = width * zoom;
 	float hzoom = height * zoom;
-	pthread_mutex_lock(&world->swapMutex);
+	uint8_t v;
+	/*uint8_t* rdata = malloc(world->width * world->height * 3);
+	 uint8_t r;
+	 uint8_t g;
+	 uint8_t b;
+	 pthread_mutex_lock(&world->swapMutex);
+	 for (int32_t y = 0; y < world->height; y++) {
+	 for (int32_t x = 0; x < world->width; x++) {
+	 v = world_get(world->data, world->width, x, y);
+	 //printf("<%i, %i> = %i (%lu)\n", x, y, v, y * world->width * 3 + x * 3);
+	 if (v == 1) {
+	 r = 0xFF;
+	 g = 0xFF;
+	 b = 0x00;
+	 } else if (v == 2) {
+	 r = 0x00;
+	 g = 0x00;
+	 b = 0xFF;
+	 } else if (v == 3) {
+	 r = 0xFF;
+	 g = 0x00;
+	 b = 0x00;
+	 } else {
+	 r = 0x00;
+	 g = 0x00;
+	 b = 0x00;
+	 }
+	 rdata[y * world->width * 3 + x * 3] = r;
+	 rdata[y * world->width * 3 + x * 3 + 1] = g;
+	 rdata[y * world->width * 3 + x * 3 + 2] = b;
+	 }
+	 }
+	 pthread_mutex_unlock(&world->swapMutex);
+	 glEnable (GL_TEXTURE_2D);
+	 glBindTexture(GL_TEXTURE_2D, TX_MAP);
+	 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	 #ifdef GL_TEXTURE_MAX_ANISOTROPY_EXT
+	 glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0);
+	 #endif
+	 glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, world->width, world->height, 0, GL_RGB, GL_UNSIGNED_BYTE, rdata);
+	 free(rdata);*/
 	glPushMatrix();
 	glTranslatef(-camX + wzoom / 2., -camY + hzoom / 2., 0.);
+	pthread_mutex_lock(&world->swapMutex);
 	glBegin (GL_QUADS);
 	for (int32_t x = (camX - wzoom / 2. - 16) / 16.; x < (camX + wzoom / 2. + 16) / 16.; x++) {
 		for (int32_t y = (camY - hzoom / 2. - 16) / 16.; y < (camY + hzoom / 2. + 16) / 16.; y++) {
-			uint8_t v = 0;
+			v = 0;
 			if (x >= 0 && y >= 0 && x < world->width && y < world->height) {
 				v = world_get(world->data, world->width, x, y);
 			}
@@ -169,8 +215,19 @@ void drawIngame(float partialTick) {
 	}
 	//drawQuads(world->vao);
 	glEnd();
-	glPopMatrix();
 	pthread_mutex_unlock(&world->swapMutex);
+	//glBegin (GL_QUADS);
+	//glVertex2f(0., 0.);
+	//glTexCoord2f(0., 1.);
+	//glVertex2f(0., world->height * 16.);
+	//glTexCoord2f(1., 1.);
+	//glVertex2f(world->width * 16., world->height * 16.);
+	//glTexCoord2f(1., 0.);
+	//glVertex2f(world->width * 16., 0.);
+	//glTexCoord2f(0., 0.);
+	//glEnd();
+	glPopMatrix();
+	//glDisable(GL_TEXTURE_2D);
 }
 
 void drawGUI(float partialTick) {
@@ -223,3 +280,4 @@ void claimMouse() {
 void unclaimMouse() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
+

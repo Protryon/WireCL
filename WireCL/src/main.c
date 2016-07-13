@@ -19,9 +19,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "world.h"
-#ifndef __MINGW32__
+//#ifndef __MINGW32__
 #include <CL/cl.h>
-#endif
+//#endif
 #include <pthread.h>
 
 int fr = 30;
@@ -185,12 +185,22 @@ int main(int argc, char *argv[]) {
 #else
 			strrchr(ncwd, '/');
 #endif
-	ecwd++;
-	ecwd[0] = 0;
-	chdir(ncwd);
+	if (ecwd != NULL) {
+		ecwd++;
+		ecwd[0] = 0;
+		chdir(ncwd);
+	}
 	printf("Loading... [FROM=%s]\n", strlen(INSTALLDIR) == 0 ? ncwd : INSTALLDIR);
-#ifndef __MINGW32__
+//#ifndef __MINGW32__
+#ifdef __MINGW32__
+	char cwd2[1024];
+	getcwd(cwd2, 1024);
+	char path[4096];
+	snprintf(path, 4096, "%s\\assets\\wireworld.cl", cwd2);
+	int sfd = open(path, O_RDONLY);
+#else
 	int sfd = open("./assets/wireworld.cl", O_RDONLY);
+#endif
 	if (sfd < 0) {
 		char cwd[1024];
 		getcwd(cwd, 1024);
@@ -223,7 +233,7 @@ int main(int argc, char *argv[]) {
 	char bl[65536];
 	clGetProgramBuildInfo(wire_program, device_id, CL_PROGRAM_BUILD_LOG, 65536, bl, NULL);
 	printf("Build Log: %s\n", bl);
-#endif
+//#endif
 	pthread_t gpt;
 	pthread_create(&gpt, NULL, updateThread, NULL);
 	width = 800;
@@ -259,11 +269,11 @@ int main(int argc, char *argv[]) {
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
 	//glEnable (GL_MULTISAMPLE);
 	//glEnable (GL_MULTISAMPLE_ARB);
-	glEnable (GL_DEPTH_TEST);
-	glEnable (GL_TEXTURE_2D);
+	//glEnable (GL_DEPTH_TEST);
+	//glEnable (GL_TEXTURE_2D);
 	glEnable (GL_CULL_FACE);
-	glAlphaFunc(GL_GREATER, 0.1);
-	glEnable (GL_ALPHA_TEST);
+	//glAlphaFunc(GL_GREATER, 0.1);
+	//glEnable (GL_ALPHA_TEST);
 	loadGUI();
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	lt = (double) ts.tv_sec * 1000. + (double) ts.tv_nsec / 1000000.;
