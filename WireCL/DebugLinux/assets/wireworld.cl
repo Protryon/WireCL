@@ -40,6 +40,7 @@ __kernel void wireworld(const __global uchar* input, __global uchar* out, const 
 				break;
 			}
 		}
+		out[y * width / 4 + x / 4] &= ~(0x03 << ((x % 4) * 2)); // clear it first
 		out[y * width / 4 + x / 4] |= (newType << ((x % 4) * 2));
 	}
 }

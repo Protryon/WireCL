@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include "render.h"
+#include <time.h>
 
 struct world* newWorld() {
 	struct world* world = malloc(sizeof(struct world));
@@ -152,50 +153,69 @@ int loadWorldData(char* file, struct world* world) {
 int saveWorldData(char* file, struct world* world) {
 
 }
+
 #ifndef __MINGW32__
+cl_mem inputCL;
+cl_mem outputCL;
+cl_kernel clk;
+double lms = 0.;
 void updateWorldGPU(struct world* world) {
 	cl_int clret = 0;
-	cl_mem inputCL = clCreateBuffer(wire_context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, world->height * world->width / 4, world->data, &clret);
-	if (clret != CL_SUCCESS) {
-		printf("Error in clCreateBuffer<input>: '%i'\n", clret);
-		return;
+	if (!inputCL) {
+		inputCL = clCreateBuffer(wire_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR, world->height * world->width / 4, world->data, &clret);
+		if (clret != CL_SUCCESS) {
+			printf("Error in clCreateBuffer<input>: '%i'\n", clret);
+			return;
+		}
 	}
-	clret = clEnqueueWriteBuffer(wire_command_queue, inputCL, CL_TRUE, 0, world->height * world->width / 4, world->data, 0, NULL, NULL);
-	if (clret != CL_SUCCESS) {
-		printf("Error in clEnqueueWriteBuffer<input>: '%i'\n", clret);
-		return;
+	if (!outputCL) {
+		outputCL = clCreateBuffer(wire_context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, world->height * world->width / 4, NULL, &clret);
+		if (clret != CL_SUCCESS) {
+			printf("Error in clCreateBuffer<output>: '%i'\n", clret);
+			return;
+		}
 	}
-	cl_mem outputCL = clCreateBuffer(wire_context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, world->height * world->width / 4, world->newData, &clret);
-	if (clret != CL_SUCCESS) {
-		printf("Error in clCreateBuffer<output>: '%i'\n", clret);
-		return;
+	if (!clk) {
+		clk = clCreateKernel(wire_program, "wireworld", &clret);
+		if (clret != CL_SUCCESS) {
+			printf("Error in clCreateKernel<wireworld>: '%i'\n", clret);
+			return;
+		}
+		clSetKernelArg(clk, 2, sizeof(int), (void *) &world->width);
+		clSetKernelArg(clk, 3, sizeof(int), (void *) &world->height);
 	}
-	cl_kernel kernel = clCreateKernel(wire_program, "wireworld", &clret);
-	if (clret != CL_SUCCESS) {
-		printf("Error in clCreateKernel<wireworld>: '%i'\n", clret);
-		return;
-	}
-	clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *) &inputCL);
-	clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *) &outputCL);
-	clSetKernelArg(kernel, 2, sizeof(int), (void *) &world->width);
-	clSetKernelArg(kernel, 3, sizeof(int), (void *) &world->height);
+	clSetKernelArg(clk, 0, sizeof(cl_mem), (void *) &inputCL);
+	clSetKernelArg(clk, 1, sizeof(cl_mem), (void *) &outputCL);
 	size_t gws[2] = { world->width / 4, world->height };
-	clret = clEnqueueNDRangeKernel(wire_command_queue, kernel, 2, NULL, gws, NULL, 0, NULL, NULL);
+	clret = clEnqueueNDRangeKernel(wire_command_queue, clk, 2, NULL, gws, NULL, 0, NULL, NULL);
 	if (clret != CL_SUCCESS) {
 		printf("Error in clEnqueueNDRangeKernel<sobel>: '%i'\n", clret);
 		return;
 	}
 	clFinish (wire_command_queue);
-	clEnqueueReadBuffer(wire_command_queue, outputCL, CL_TRUE, 0, world->height * world->width / 4, world->newData, 0, NULL, NULL);
-	clReleaseMemObject(inputCL);
-	clReleaseMemObject(outputCL);
-	clReleaseKernel(kernel);
-	pthread_mutex_lock(&world->swapMutex);
-	void* od = world->data;
-	world->data = world->newData;
-	memset(od, 0, world->height * world->width / 4);
-	world->newData = od;
-	pthread_mutex_unlock(&world->swapMutex);
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	double cms = (double) ts.tv_sec * 1000. + (double) ts.tv_nsec / 1000000.;
+	int gnd = 0;
+	if (cms - lms < (1000. / 60.)) {
+		clEnqueueReadBuffer(wire_command_queue, outputCL, CL_TRUE, 0, world->height * world->width / 4, world->newData, 0, NULL, NULL);
+		gnd = 1;
+	}
+	lms = cms;
+	//clReleaseMemObject(inputCL);
+	//clReleaseMemObject(outputCL);
+	//clReleaseKernel (kernel);
+	if (gnd) {
+		pthread_mutex_lock(&world->swapMutex);
+		void* od = world->data;
+		world->data = world->newData;
+		pthread_mutex_unlock(&world->swapMutex);
+		memset(od, 0, world->height * world->width / 4);
+		world->newData = od;
+	}
+	cl_mem tm = outputCL;
+	outputCL = inputCL;
+	inputCL = tm;
 	world->generation++;
 	world->gps++;
 }
