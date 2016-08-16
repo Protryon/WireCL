@@ -22,7 +22,6 @@
 //#ifndef __MINGW32__
 #include <CL/cl.h>
 //#endif
-#include <pthread.h>
 
 int fr = 30;
 int rr = 0;
@@ -283,14 +282,4 @@ int main(int argc, char *argv[]) {
 	}
 	glfwTerminate();
 	return 0;
-//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB | GLUT_MULTISAMPLE);
-
-//glutKeyboardFunc(keyboardCallback);
-//glutKeyboardUpFunc(keyboardUpCallback);
-//glutSpecialFunc(keyboardSpecCallback);
-//glutDisplayFunc(displayCallback);
-//glutMotionFunc(mouseMotionCallback);
-//glutMouseFunc(mouseCallback);
-//glutPassiveMotionFunc(mouseMotionCallback);
-//glutSetKeyRepeat (GLUT_KEY_REPEAT_OFF);
 }

@@ -159,6 +159,7 @@ cl_mem outputCL;
 cl_kernel clk;
 double lms = 0.;
 void updateWorldGPU(struct world* world) {
+	struct timespec ts;
 	cl_int clret = 0;
 	if (!inputCL) {
 		inputCL = clCreateBuffer(wire_context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR, world->height * world->width / 4, world->data, &clret);
@@ -168,8 +169,12 @@ void updateWorldGPU(struct world* world) {
 		}
 	}
 	if (reflush) {
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		double ct = (double) ts.tv_nsec / 1000000. + ts.tv_sec * 1000.;
 		clEnqueueWriteBuffer(wire_command_queue, inputCL, CL_TRUE, 0, world->height * world->width / 4, world->data, 0, NULL, NULL);
 		reflush = 0;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		printf("reflush took %f ms\n", ((double) ts.tv_nsec / 1000000. + ts.tv_sec * 1000.) - ct);
 	}
 	if (!outputCL) {
 		outputCL = clCreateBuffer(wire_context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, world->height * world->width / 4, NULL, &clret);
@@ -190,18 +195,29 @@ void updateWorldGPU(struct world* world) {
 	clSetKernelArg(clk, 0, sizeof(cl_mem), (void *) &inputCL);
 	clSetKernelArg(clk, 1, sizeof(cl_mem), (void *) &outputCL);
 	size_t gws[2] = { world->width / 4, world->height };
+	//clock_gettime(CLOCK_MONOTONIC, &ts);
+	//double ct = (double) ts.tv_nsec / 1000000. + ts.tv_sec * 1000.;
 	clret = clEnqueueNDRangeKernel(wire_command_queue, clk, 2, NULL, gws, NULL, 0, NULL, NULL);
 	if (clret != CL_SUCCESS) {
-		printf("Error in clEnqueueNDRangeKernel<sobel>: '%i'\n", clret);
+		//printf("Error in clEnqueueNDRangeKernel<sobel>: '%i'\n", clret);
 		return;
 	}
+	//clock_gettime(CLOCK_MONOTONIC, &ts);
+	//printf("clEnqueueNDRangeKernel took %f ms\n", ((double) ts.tv_nsec / 1000000. + ts.tv_sec * 1000.) - ct);
+	//clock_gettime(CLOCK_MONOTONIC, &ts);
+	//ct = (double) ts.tv_nsec / 1000000. + ts.tv_sec * 1000.;
 	clFinish (wire_command_queue);
-	struct timespec ts;
+	//clock_gettime(CLOCK_MONOTONIC, &ts);
+	//printf("clFinish took %f ms\n", ((double) ts.tv_nsec / 1000000. + ts.tv_sec * 1000.) - ct);
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	double cms = (double) ts.tv_sec * 1000. + (double) ts.tv_nsec / 1000000.;
 	int gnd = 0;
 	if (cms - lms > (1000. / FRAMELIMIT)) {
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		//ct = (double) ts.tv_nsec / 1000000. + ts.tv_sec * 1000.;
 		clEnqueueReadBuffer(wire_command_queue, outputCL, CL_TRUE, 0, world->height * world->width / 4, world->newData, 0, NULL, NULL);
+		//clock_gettime(CLOCK_MONOTONIC, &ts);
+		//printf("clEnqueueReadBuffer took %f ms\n", ((double) ts.tv_nsec / 1000000. + ts.tv_sec * 1000.) - ct);
 		gnd = 1;
 		lms = cms;
 	}

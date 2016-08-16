@@ -6,9 +6,7 @@
 C_SRCS += \
 ../src/glew.c \
 ../src/gui.c \
-../src/json.c \
 ../src/main.c \
-../src/nbt.c \
 ../src/render.c \
 ../src/streams.c \
 ../src/world.c \
@@ -17,9 +15,7 @@ C_SRCS += \
 OBJS += \
 ./src/glew.o \
 ./src/gui.o \
-./src/json.o \
 ./src/main.o \
-./src/nbt.o \
 ./src/render.o \
 ./src/streams.o \
 ./src/world.o \
@@ -28,9 +24,7 @@ OBJS += \
 C_DEPS += \
 ./src/glew.d \
 ./src/gui.d \
-./src/json.d \
 ./src/main.d \
-./src/nbt.d \
 ./src/render.d \
 ./src/streams.d \
 ./src/world.d \

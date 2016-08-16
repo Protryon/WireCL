@@ -1,8 +1,0 @@
-*.[do]
-*.exe
-*.dll
-/DebugWindows/WireCL   
-/DebugWindows/WireCL.exe
-/DebugLinux/WireCL
-
-/ReleaseWindows/
